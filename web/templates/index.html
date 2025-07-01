@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project_name }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fab fa-github"></i>
+                    <h1>{{ project_name }}</h1>
+                </div>
+                <p class="subtitle">Input your proposal idea first, then find and select relevant GitHub projects automatically</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-edit"></i> Create Your Proposal</h2>
+                        <p>Start by describing your proposal idea, then we'll find relevant GitHub projects for you</p>
+                    </div>
+                    
+                    <!-- Progress Indicator -->
+                    <div class="progress-indicator">
+                        <div class="progress-step active" id="progressStep1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Proposal Details</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" id="progressStep2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Select Repository</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" id="progressStep3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Generate Proposal</div>
+                        </div>
+                    </div>
+                    
+                    <form id="proposalForm" class="proposal-form">
+                        <!-- Step 1: Proposal Details -->
+                        <div class="form-step active" id="step1">
+                            <h3><i class="fas fa-file-alt"></i> Your Proposal Details</h3>
+                            <p class="step-description">Tell us about your proposal idea. We'll help you find relevant GitHub projects.</p>
+                            
+                            <div class="form-group">
+                                <label for="title">Proposal Title</label>
+                                <input type="text" 
+                                       id="title" 
+                                       name="title" 
+                                       placeholder="Enter a descriptive title for your proposal"
+                                       required
+                                       maxlength="100">
+                                <div class="char-counter">
+                                    <span id="titleCounter">0</span>/100
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" 
+                                          name="description" 
+                                          placeholder="Describe your proposal in detail..."
+                                          rows="4"
+                                          required
+                                          maxlength="1000"></textarea>
+                                <div class="char-counter">
+                                    <span id="descriptionCounter">0</span>/1000
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="conclusions">Objectives & Goals</label>
+                                <textarea id="conclusions" 
+                                          name="conclusions" 
+                                          placeholder="List your objectives and desired outcomes (separate with new lines or semicolons)..."
+                                          rows="4"
+                                          required></textarea>
+                                <small class="help-text">Each line will become a separate objective</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="language">Preferred Programming Language (Optional)</label>
+                                <select id="language" name="language" class="form-select">
+                                    <option value="">Any Language</option>
+                                    <option value="JavaScript">JavaScript</option>
+                                    <option value="Python">Python</option>
+                                    <option value="Java">Java</option>
+                                    <option value="TypeScript">TypeScript</option>
+                                    <option value="C++">C++</option>
+                                    <option value="C#">C#</option>
+                                    <option value="PHP">PHP</option>
+                                    <option value="Ruby">Ruby</option>
+                                    <option value="Go">Go</option>
+                                    <option value="Rust">Rust</option>
+                                    <option value="Swift">Swift</option>
+                                    <option value="Kotlin">Kotlin</option>
+                                </select>
+                                <small class="help-text">Select a language to find projects in that specific technology</small>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" id="nextStep1" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Find Relevant Projects
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Repository Selection -->
+                        <div class="form-step" id="step2">
+                            <h3><i class="fab fa-github"></i> Choose a Repository</h3>
+                            <p class="step-description">We found these repositories that match your proposal. Select one to continue.</p>
+                            
+                            <!-- Search Results -->
+                            <div id="searchResults" class="search-results">
+                                <div class="search-info">
+                                    <p id="searchQuery"></p>
+                                    <p id="searchCount"></p>
+                                </div>
+                                <div id="repositoryList" class="repository-list">
+                                    <!-- Repository cards will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Selected Repository Info -->
+                            <div id="selectedRepoInfo" class="repo-info hidden">
+                                <h4>Selected Repository:</h4>
+                                <div class="repo-card selected">
+                                    <div class="repo-header">
+                                        <h5 id="selectedRepoName"></h5>
+                                        <a id="selectedRepoUrl" href="#" target="_blank" class="btn btn-small">
+                                            <i class="fas fa-external-link-alt"></i> View
+                                        </a>
+                                    </div>
+                                    <p id="selectedRepoDescription"></p>
+                                    <div class="repo-stats">
+                                        <span class="stat">
+                                            <i class="fas fa-code"></i>
+                                            <span id="selectedRepoLanguage"></span>
+                                        </span>
+                                        <span class="stat">
+                                            <i class="fas fa-star"></i>
+                                            <span id="selectedRepoStars"></span>
+                                        </span>
+                                        <span class="stat">
+                                            <i class="fas fa-code-branch"></i>
+                                            <span id="selectedRepoForks"></span>
+                                        </span>
+                                        <span class="stat">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            <span id="selectedRepoIssues"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" id="prevStep2" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                                <button type="submit" id="generateProposal" class="btn btn-primary" disabled>
+                                    <i class="fas fa-magic"></i> Generate Proposal
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="resultsSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-file-download"></i> Generated Proposal</h2>
+                        <div class="result-actions">
+                            <button id="copyProposal" class="btn btn-secondary">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button id="saveProposal" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="newProposal" class="btn btn-outline">
+                                <i class="fas fa-plus"></i> New
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="proposal-output">
+                        <div id="proposalContent" class="proposal-content"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p id="loadingMessage">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
